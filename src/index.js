@@ -12,15 +12,15 @@ authorize().then((auth) => (client = auth));
 const app = express();
 const server = createServer(app);
 
-// TODO: remove this bogus commit that is to trick the build server
-
-//
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.get('/', async (req, res) => {
-	const events = await listEvents(client);
-	res.send(events);
+	const isCurl = req.headers && req.headers['user-agent'] && req.headers['user-agent'].includes('curl');
+	const events = await listEvents(client, !isCurl);
+
+	if (isCurl) res.send(events);
+	else res.send(`<pre>${events}</pre>`);
 });
 
 server.listen(PORT, () => {
